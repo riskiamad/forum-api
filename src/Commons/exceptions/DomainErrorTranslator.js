@@ -24,12 +24,12 @@ DomainErrorTranslator._directories = {
   'NEW_THREAD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan comment baru karena properti yang dibutuhkan tidak ada'),
   'NEW_THREAD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan comment baru karena tipe data tidak sesuai'),
   'DELETE_COMMENT_USE_CASE.UNAUTHORIZED': new AuthorizationError('tidak dapat menghapus comment yang bukan milik anda'),
-  'THREAD_COMMENT_REPOSITORY_POSTGRES.NOT_FOUND': new NotFoundError('comment tidak ditemukan'),
-  'THREAD_REPOSITORY_POSTGRES.NOT_FOUND': new NotFoundError('thread tidak ditemukan'),
+  'THREAD_COMMENT.NOT_FOUND': new NotFoundError('comment tidak ditemukan'),
+  'THREAD.NOT_FOUND': new NotFoundError('thread tidak ditemukan'),
   'NEW_REPLY.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan balasan baru karena properti yang dibutuhkan tidak ada'),
   'NEW_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan balasan baru karena tipe data tidak sesuai'),
   'DELETE_REPLY_USE_CASE.UNAUTHORIZED': new AuthorizationError('tidak dapat menghapus balasan yang bukan milik anda'),
-  'THREAD_COMMENT_REPLY_REPOSITORY_POSTGRES.NOT_FOUND': new NotFoundError('balasan tidak ditemukan'),
+  'THREAD_COMMENT_REPLY.NOT_FOUND': new NotFoundError('balasan tidak ditemukan'),
 };
 
 module.exports = DomainErrorTranslator;
