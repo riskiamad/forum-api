@@ -52,6 +52,30 @@ describe('/threads/{threadId}/comments endpoint', () => {
       expect(responseJson.data.addedComment).toBeDefined();
     });
 
+    it('should response 404 because thread not found', async () => {
+      const server = await createServer(container);
+      const accessToken = await ServerTestHelper.generateToken();
+
+      // Arrange
+      const requestPayload = {
+        content: 'content comment',
+      };
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/xxx/comments`,
+        payload: requestPayload,
+        headers: {'Authorization': `Bearer ${accessToken}`},
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('thread tidak ditemukan');
+    });
+
     it('should response 400 when request payload not contain needed property', async () => {
       const server = await createServer(container);
       const accessToken = await ServerTestHelper.generateToken();

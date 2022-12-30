@@ -1,5 +1,4 @@
 const ThreadCommentRepository = require('../../Domains/threadComments/ThreadCommentRepository');
-const Comment = require('../../Domains/threadComments/entities/Comment');
 
 class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
   constructor(pool, idGenerator) {
@@ -20,23 +19,8 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
     const result = await this._pool.query(query);
 
-    return new Comment({ ...result.rows[0] });
+    return result.rows[0];
   }
-
-  // getCommentById = (commentId) => new Promise(async (resolve, reject) => {
-  //   try {
-  //     const query = {
-  //       text: 'SELECT id, content, thread_id AS "threadId", owner, date, is_delete AS "isDelete" FROM thread_comments' +
-  //         ' WHERE id = $1',
-  //       values: [commentId],
-  //     };
-  //
-  //     const result = await this._pool.query(query);
-  //     resolve(new Comment( { ...result.rows[0] }))
-  //   } catch (error) {
-  //     reject(error)
-  //   }
-  // })
 
   async getCommentById(commentId) {
     const query = {
@@ -47,11 +31,7 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
-      throw new Error('THREAD_COMMENT_REPOSITORY_POSTGRES.NOT_FOUND');
-    }
-
-    return new Comment({...result.rows[0]});
+    return result.rows[0];
   }
 
   async deleteComment(commentId) {
@@ -67,9 +47,8 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
   async getCommentsByThreadId(threadId) {
     const query = {
-      text: `SELECT tc.id, tc.thread_id AS "threadId", tc.date, u.username,` +
-            ` CASE is_delete WHEN true THEN '**komentar telah dihapus**'` +
-            ` ELSE content END AS content FROM thread_comments tc ` +
+      text: `SELECT tc.id, tc.content, tc.date, tc.is_delete AS "isDelete", u.username` +
+            ` FROM thread_comments tc` +
             ` LEFT JOIN users u ON u.id = tc.owner` +
             ` WHERE tc.thread_id = $1 ORDER BY date ASC`,
       values: [threadId],
@@ -78,6 +57,17 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
     const result = await this._pool.query(query);
 
     return result.rows;
+  }
+
+  async verifyCommentExists(commentId) {
+    const query = {
+      text: 'SELECT id FROM thread_comments WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return !!result.rows.length;
   }
 }
 

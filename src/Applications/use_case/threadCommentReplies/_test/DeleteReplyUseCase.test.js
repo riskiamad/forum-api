@@ -9,19 +9,21 @@ describe('DeleteReplyUseCase', () => {
       owner: 'user-123',
     };
 
-    const expectedReply = {
-      id: 'reply-123',
-      owner: 'user-123',
-    };
-
     /** mocking dependency of use case */
     const mockThreadCommentReplyRepository = new ThreadCommentReplyRepository();
 
     /** mocking needed function */
+    mockThreadCommentReplyRepository.getReplyById = jest.fn()
+      .mockImplementation(() => Promise.resolve({
+        id: 'reply-123',
+        content: 'content reply',
+        commentId: 'comment-123',
+        owner: 'user-123',
+        date: '2022-12-29T20:17:28.526Z',
+        isDelete: false,
+      }));
     mockThreadCommentReplyRepository.deleteReply = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadCommentReplyRepository.getReplyById = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedReply));
 
     /** mocking needed function */
     const deleteReplyUseCase = new DeleteReplyUseCase({
@@ -32,6 +34,7 @@ describe('DeleteReplyUseCase', () => {
     await deleteReplyUseCase.execute(deletePayload);
 
     // Assert
+    expect(mockThreadCommentReplyRepository.getReplyById(deletePayload.replyId));
     expect(mockThreadCommentReplyRepository.deleteReply)
       .toHaveBeenCalledWith(deletePayload.replyId);
   })
