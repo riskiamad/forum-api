@@ -7,11 +7,11 @@ class ThreadCommentReplyRepository {
     throw new Error('THREAD_COMMENT_REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async getRepliesByCommentId(newReply) {
+  async getRepliesByCommentIds(commentIds) {
     throw new Error('THREAD_COMMENT_REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async verifyReplyOwner(newReply) {
+  async verifyReplyOwner(ReplyId, owner) {
     throw new Error('THREAD_COMMENT_REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 }

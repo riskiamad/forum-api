@@ -26,6 +26,12 @@ describe('DetailThreadUseCase', () => {
               content: 'content reply',
               date: '2022-12-29T20:17:28.630Z',
               username: 'riskiamad',
+            },
+            {
+              id: 'reply-456',
+              content: 'content reply',
+              date: '2022-12-29T20:17:28.630Z',
+              username: 'riskiamad',
             }
           ],
         },
@@ -56,13 +62,22 @@ describe('DetailThreadUseCase', () => {
           username: 'riskiamad',
         }
       ]));
-    mockThreadCommentReplyRepository.getRepliesByCommentId = jest.fn()
+    mockThreadCommentReplyRepository.getRepliesByCommentIds = jest.fn()
       .mockImplementation(() => Promise.resolve([
         {
           id: 'reply-123',
           content: 'content reply',
           date: '2022-12-29T20:17:28.630Z',
           isDelete: false,
+          commentId: 'comment-123',
+          username: 'riskiamad',
+        },
+        {
+          id: 'reply-456',
+          content: 'content reply',
+          date: '2022-12-29T20:17:28.630Z',
+          isDelete: false,
+          commentId: 'comment-123',
           username: 'riskiamad',
         }
       ]));
@@ -81,6 +96,6 @@ describe('DetailThreadUseCase', () => {
     expect(detailThread).toStrictEqual(expectedDetailThread);
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
     expect(mockThreadCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
-    expect(mockThreadCommentReplyRepository.getRepliesByCommentId).toBeCalledWith('comment-123');
+    expect(mockThreadCommentReplyRepository.getRepliesByCommentIds).toBeCalledWith(['comment-123']);
   });
 });

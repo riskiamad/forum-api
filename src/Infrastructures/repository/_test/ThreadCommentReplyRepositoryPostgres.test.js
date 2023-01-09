@@ -124,7 +124,7 @@ describe('ThreadCommentReplyRepositoryPostgres', () => {
       // Action
       const now = new Date();
       await ThreadCommentRepliesTableTestHelper.addReply({ id: replyId, content: newReply.content, commentId: newReply.commentId, owner: newReply.owner, date: now });
-      const replies = await threadCommentReplyRepositoryPostgres.getRepliesByCommentId(commentId);
+      const replies = await threadCommentReplyRepositoryPostgres.getRepliesByCommentIds([commentId]);
 
       // Assert
       expect(replies[0].id).toEqual(replyId);
