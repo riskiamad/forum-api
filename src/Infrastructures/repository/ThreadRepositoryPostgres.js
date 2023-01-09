@@ -8,7 +8,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
   }
 
   async addThread(newThread) {
-    const { title, body, owner } = newThread;
+    const {title, body, owner} = newThread;
     const id = `thread-${this._idGenerator()}`;
     const date = new Date().toISOString();
 
@@ -24,13 +24,17 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getThreadById(threadId) {
     const query = {
-      text: 'SELECT t.id, t.title, t.body, t.date, u.username FROM threads t' +
-            ' LEFT JOIN users u ON u.id = t.owner' +
-            ' WHERE t.id = $1',
+      text: `SELECT t.id, t.title, t.body, t.date, u.username FROM threads t` +
+        ` LEFT JOIN users u ON u.id = t.owner` +
+        ` WHERE t.id = $1`,
       values: [threadId],
     };
 
     const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new Error('THREAD.NOT_FOUND');
+    }
 
     return result.rows[0];
   }
@@ -43,7 +47,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const result = await this._pool.query(query);
 
-    return !!result.rows.length;
+    if (!result.rowCount) {
+      throw new Error('THREAD.NOT_FOUND');
+    }
   }
 }
 

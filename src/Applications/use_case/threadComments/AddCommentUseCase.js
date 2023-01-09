@@ -11,10 +11,7 @@ class AddCommentUseCase {
 
   async execute(useCasePayload) {
     const newComment = new NewThreadComment(useCasePayload);
-    const exists = await this._threadRepository.verifyThreadExists(newComment.threadId);
-    if (!exists) {
-      throw new Error('THREAD.NOT_FOUND');
-    }
+    await this._threadRepository.verifyThreadExists(newComment.threadId);
 
     return await this._threadCommentRepository.addComment(newComment);
   }

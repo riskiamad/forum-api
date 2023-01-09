@@ -22,18 +22,6 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
     return result.rows[0];
   }
 
-  async getCommentById(commentId) {
-    const query = {
-      text: 'SELECT id, content, thread_id AS "threadId", owner, date, is_delete AS "isDelete" FROM thread_comments' +
-            ' WHERE id = $1',
-      values: [commentId],
-    };
-
-    const result = await this._pool.query(query);
-
-    return result.rows[0];
-  }
-
   async deleteComment(commentId) {
     const query = {
       text: 'UPDATE thread_comments' +
@@ -67,7 +55,26 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
     const result = await this._pool.query(query);
 
-    return !!result.rows.length;
+    if (!result.rowCount) {
+      throw new Error('THREAD_COMMENT.NOT_FOUND');
+    }
+  }
+
+  async verifyCommentOwner(commentId, owner) {
+    const query = {
+      text: 'SELECT id, owner FROM thread_comments WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new Error('THREAD_COMMENT.NOT_FOUND');
+    }
+
+    if (result.rows[0].owner !== owner) {
+      throw new Error('THREAD_COMMENT.UNAUTHORIZED');
+    }
   }
 }
 

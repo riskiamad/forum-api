@@ -7,15 +7,7 @@ class DeleteReplyUseCase {
 
   async execute(useCasePayload) {
     const {replyId, owner} = useCasePayload;
-    const reply = await this._threadCommentReplyRepository.getReplyById(replyId);
-
-    if (!reply) {
-      throw new Error('THREAD_COMMENT_REPLY.NOT_FOUND');
-    }
-
-    if (reply.owner !== owner) {
-      throw new Error('DELETE_REPLY_USE_CASE.UNAUTHORIZED');
-    }
+    await this._threadCommentReplyRepository.verifyReplyOwner(replyId, owner);
 
     await this._threadCommentReplyRepository.deleteReply(replyId);
   }

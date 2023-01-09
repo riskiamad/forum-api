@@ -22,18 +22,6 @@ class ThreadCommentReplyRepositoryPostgres extends ThreadCommentReplyRepository 
     return result.rows[0];
   }
 
-  async getReplyById(replyId) {
-    const query = {
-      text: 'SELECT id, content, thread_comment_id AS "commentId", owner, date, is_delete AS "isDelete"' +
-            ' FROM thread_comment_replies WHERE id = $1',
-      values: [replyId],
-    };
-
-    const result = await this._pool.query(query);
-
-    return result.rows[0];
-  }
-
   async deleteReply(replyId) {
     const query = {
       text: 'UPDATE thread_comment_replies' +
@@ -57,6 +45,23 @@ class ThreadCommentReplyRepositoryPostgres extends ThreadCommentReplyRepository 
     const result = await this._pool.query(query);
 
     return result.rows;
+  }
+
+  async verifyReplyOwner(replyId, owner) {
+    const query = {
+      text: 'SELECT id, owner FROM thread_comment_replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new Error('THREAD_COMMENT_REPLY.NOT_FOUND');
+    }
+
+    if (result.rows[0].owner !== owner) {
+      throw new Error('THREAD_COMMENT_REPLY.UNAUTHORIZED');
+    }
   }
 }
 

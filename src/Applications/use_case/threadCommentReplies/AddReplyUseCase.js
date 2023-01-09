@@ -14,15 +14,9 @@ class AddReplyUseCase {
   async execute(useCasePayload) {
     const newReply = new NewReply(useCasePayload);
 
-    const threadExists = await this._threadRepository.verifyThreadExists(newReply.threadId);
-    if (!threadExists) {
-      throw new Error('THREAD.NOT_FOUND');
-    }
+    await this._threadRepository.verifyThreadExists(newReply.threadId);
 
-    const threadCommentExists = await this._threadCommentRepository.verifyCommentExists(newReply.commentId);
-    if (!threadCommentExists) {
-      throw new Error('THREAD_COMMENT.NOT_FOUND');
-    }
+    await this._threadCommentRepository.verifyCommentExists(newReply.commentId);
 
     return await this._threadCommentReplyRepository.addReply(newReply);
   }

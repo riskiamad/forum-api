@@ -2,6 +2,7 @@ const NewThreadComment = require('../../../../Domains/threadComments/entities/Ne
 const ThreadCommentRepository = require('../../../../Domains/threadComments/ThreadCommentRepository');
 const ThreadRepository = require('../../../../Domains/threads/ThreadRepository');
 const AddCommentUseCase = require('../AddCommentUseCase');
+const {add} = require("nodemon/lib/rules");
 
 describe('AddCommentUseCase', () => {
   it('should orchestrating the new comment action correctly', async () => {
@@ -18,9 +19,13 @@ describe('AddCommentUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.verifyThreadExists = jest.fn()
-      .mockImplementation(() => Promise.resolve(true));
-    mockThreadCommentRepository.addComment = jest.fn()
       .mockImplementation(() => Promise.resolve());
+    mockThreadCommentRepository.addComment = jest.fn()
+      .mockImplementation(() => Promise.resolve({
+        id: 'comment-123',
+        content: useCasePayload.content,
+        owner: useCasePayload.owner,
+      }));
 
     /** mocking needed function */
     const getCommentUseCase = new AddCommentUseCase({
@@ -29,14 +34,17 @@ describe('AddCommentUseCase', () => {
     });
 
     // Action
-    await getCommentUseCase.execute(useCasePayload);
+    const addedComment = await getCommentUseCase.execute(useCasePayload);
 
     // Assert
-    expect(mockThreadRepository.verifyThreadExists(useCasePayload.threadId));
+    expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(useCasePayload.threadId);
     expect(mockThreadCommentRepository.addComment).toBeCalledWith(new NewThreadComment({
       content: useCasePayload.content,
       threadId: useCasePayload.threadId,
       owner: useCasePayload.owner,
     }));
+    expect(addedComment.id).toEqual('comment-123');
+    expect(addedComment.content).toEqual(useCasePayload.content);
+    expect(addedComment.owner).toEqual(useCasePayload.owner);
   });
 });

@@ -12,10 +12,6 @@ class DetailThreadUseCase {
   async execute(useCasePayload) {
     const thread = await this._threadRepository.getThreadById(useCasePayload);
 
-    if (!thread) {
-      throw new Error('THREAD.NOT_FOUND');
-    }
-
     const comments = await this._threadCommentRepository.getCommentsByThreadId(thread.id);
 
     if (comments.length) {

@@ -138,14 +138,12 @@ describe('/threads/{threadId}/comments/{commentId}/replies', () => {
       const requestCommentPayload = {
         content: 'content comment'
       };
-      const responseComment = await server.inject({
+      await server.inject({
         method: 'POST',
         url: `/threads/${threadId}/comments`,
         payload: requestCommentPayload,
         headers: {'Authorization': `Bearer ${accessToken}`},
       });
-      const responseCommentJson = JSON.parse(responseComment.payload);
-      const commentId = responseCommentJson.data.addedComment.id;
 
       // Arrange
       const requestPayload = {

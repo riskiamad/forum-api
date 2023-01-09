@@ -3,7 +3,6 @@ const container = require('../../container');
 const ServerTestHelper = require('../../../../tests/ServerTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const createServer = require('../createServer');
-const {nanoid} = require("nanoid");
 
 describe('/threads endpoint', () => {
   afterAll(async () => {

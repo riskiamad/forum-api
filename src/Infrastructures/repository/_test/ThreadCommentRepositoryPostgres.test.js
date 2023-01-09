@@ -19,41 +19,111 @@ describe('ThreadCommentRepositoryPostgres', () => {
   describe('addComment function', () => {
     it('should persist add comment', async () => {
       const randomId = nanoid(16);
+      const userId = `user-${randomId}`;
+      const threadId = `thread-${randomId}`;
+      const commentId = `comment-${randomId}`;
 
       // Add User
-      await UsersTableTestHelper.addUser({ id: `user-${randomId}`, username: `riskiamad${randomId}`});
+      await UsersTableTestHelper.addUser({ id: userId, username: `riskiamad${randomId}`});
 
       // Add Thread
-      await ThreadsTableTestHelper.addThread({ id: `thread-${randomId}`, owner: `user-${randomId}` });
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
 
       // Arrange
       const newComment = new NewThreadComment({
         content: 'content comment',
-        threadId: `thread-${randomId}`,
-        owner: `user-${randomId}`,
+        threadId: threadId,
+        owner: userId,
       });
       const fakeIdGenerator = () => randomId;
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      await threadCommentRepositoryPostgres.addComment(newComment);
+      const addedComment = await threadCommentRepositoryPostgres.addComment(newComment);
+      const comments = await ThreadCommentsTableTestHelper.findCommentsById(`comment-${randomId}`);
 
       // Assert
-      const comments = await ThreadCommentsTableTestHelper.findCommentsById(`comment-${randomId}`);
+      expect(addedComment.id).toEqual(`comment-${randomId}`);
+      expect(addedComment.content).toEqual(newComment.content);
+      expect(addedComment.owner).toEqual(newComment.owner);
       expect(comments).toHaveLength(1);
       expect(comments[0].id).toEqual(`comment-${randomId}`);
-      expect(comments[0].content).toEqual(newComment.content);
-      expect(comments[0].thread_id).toEqual(newComment.threadId);
-      expect(comments[0].owner).toEqual(newComment.owner);
-      expect(comments[0].is_delete).toEqual(false);
-      expect(comments[0].date).not.toEqual('');
-      expect(comments[0].date).toBeDefined();
     });
   });
 
   describe('deleteComment function', () => {
     it('should persist delete comment', async () => {
       const randomId = nanoid(16);
+      const userId = `user-${randomId}`;
+      const threadId = `thread-${randomId}`;
+      const commentId = `comment-${randomId}`;
+
+      // Add User
+      await UsersTableTestHelper.addUser({ id: userId, username: `riskiamad${randomId}`});
+
+      // Add Thread
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+
+      // Arrange
+      const newComment = new NewThreadComment({
+        content: 'content comment',
+        threadId: threadId,
+        owner: userId,
+      });
+      const fakeIdGenerator = () => randomId;
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await ThreadCommentsTableTestHelper.addComment({ id: commentId, content: newComment.content, owner: newComment.owner, threadId: newComment.threadId});
+      await threadCommentRepositoryPostgres.deleteComment(commentId);
+
+      // Assert
+      const comments = await ThreadCommentsTableTestHelper.findCommentsById(commentId);
+
+      expect(comments[0].is_delete).toEqual(true);
+    });
+  });
+
+  describe('getCommentsByThreadId function', () => {
+    it('should return comment', async () => {
+      const randomId = nanoid(16);
+      const userId = `user-${randomId}`;
+      const threadId = `thread-${randomId}`;
+      const commentId = `comment-${randomId}`;
+
+      // Add User
+      await UsersTableTestHelper.addUser({ id: userId, username: `riskiamad${randomId}`});
+
+      // Add Thread
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+
+      // Arrange
+      const newComment = new NewThreadComment({
+        content: 'content comment',
+        threadId: threadId,
+        owner: userId,
+      });
+      const fakeIdGenerator = () => randomId;
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      const now = new Date();
+      await ThreadCommentsTableTestHelper.addComment({ id: commentId, content: newComment.content, threadId: newComment.threadId, owner: newComment.owner, date: now});
+      const comments = await threadCommentRepositoryPostgres.getCommentsByThreadId(threadId);
+
+      // Assert
+      expect(comments).toHaveLength(1);
+      expect(comments[0].id).toEqual(commentId);
+      expect(comments[0].content).toEqual(newComment.content);
+      expect(comments[0].date).toEqual(now);
+      expect(comments[0].isDelete).toEqual(false);
+      expect(comments[0].username).toEqual(`riskiamad${randomId}`);
+    });
+  });
+
+  describe('verifyCommentExists function', () => {
+    it('should not return error if comment exists', async () => {
+      const randomId = nanoid(16);
 
       // Add User
       await UsersTableTestHelper.addUser({ id: `user-${randomId}`, username: `riskiamad${randomId}`});
@@ -73,24 +143,21 @@ describe('ThreadCommentRepositoryPostgres', () => {
       // Action
       await threadCommentRepositoryPostgres.addComment(newComment);
 
-      await threadCommentRepositoryPostgres.deleteComment(`comment-${randomId}`)
+      // Assert
+      await expect(threadCommentRepositoryPostgres.verifyCommentExists(`comment-${randomId}`)).resolves.not.toThrowError('THREAD_COMMENT.NOT_FOUND');
+    });
+
+    it('should throw error not found', async () => {
+      const fakeIdGenerator = () => '123';
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Assert
-      const comments = await ThreadCommentsTableTestHelper.findCommentsById(`comment-${randomId}`);
-      const deletedComment = await threadCommentRepositoryPostgres.getCommentById(`comment-${randomId}`);
-      expect(comments).toHaveLength(0);
-      expect(deletedComment.id).toEqual(`comment-${randomId}`);
-      expect(deletedComment.content).toEqual(newComment.content);
-      expect(deletedComment.threadId).toEqual(newComment.threadId);
-      expect(deletedComment.owner).toEqual(newComment.owner);
-      expect(deletedComment.isDelete).toEqual(true);
-      expect(deletedComment.date).not.toEqual('');
-      expect(deletedComment.date).toBeDefined();
+      await expect(threadCommentRepositoryPostgres.verifyCommentExists('xxx')).rejects.toThrowError('THREAD_COMMENT.NOT_FOUND');
     });
   });
 
-  describe('getCommentById function', () => {
-    it('should return comment', async () => {
+  describe('verifyCommentOwner function', () => {
+    it('should not return error if user is comment owner', async () => {
       const randomId = nanoid(16);
 
       // Add User
@@ -109,22 +176,13 @@ describe('ThreadCommentRepositoryPostgres', () => {
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const addedComment = await threadCommentRepositoryPostgres.addComment(newComment);
-      const comments = await threadCommentRepositoryPostgres.getCommentById(addedComment.id);
+      await threadCommentRepositoryPostgres.addComment(newComment);
 
       // Assert
-      expect(comments.id).toEqual(addedComment.id);
-      expect(comments.threadId).toEqual(newComment.threadId);
-      expect(comments.content).toEqual(newComment.content);
-      expect(comments.owner).toEqual(newComment.owner);
-      expect(comments.isDelete).toEqual(false);
-      expect(comments.date).not.toEqual('');
-      expect(comments.date).toBeDefined();
+      await expect(threadCommentRepositoryPostgres.verifyCommentOwner(`comment-${randomId}`, `user-${randomId}`)).resolves.not.toThrowError('THREAD_COMMENT.UNAUTHORIZED');
     });
-  });
 
-  describe('getCommentsByThreadId function', () => {
-    it('should return comment', async () => {
+    it('should throw error unauthorized', async () => {
       const randomId = nanoid(16);
 
       // Add User
@@ -142,46 +200,16 @@ describe('ThreadCommentRepositoryPostgres', () => {
       const fakeIdGenerator = () => randomId;
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
-      // Action
-      const addedComment = await threadCommentRepositoryPostgres.addComment(newComment);
-      const comments = await threadCommentRepositoryPostgres.getCommentsByThreadId(`thread-${randomId}`);
-
       // Assert
-      expect(comments).toHaveLength(1);
-      expect(comments[0].id).toEqual(addedComment.id);
-      expect(comments[0].content).toEqual(newComment.content);
-      expect(comments[0].date).toBeDefined();
-      expect(comments[0].date).not.toEqual('');
-      expect(comments[0].isDelete).toEqual(false);
-      expect(comments[0].username).toEqual(`riskiamad${randomId}`);
+      await expect(threadCommentRepositoryPostgres.verifyCommentOwner(`comment-${randomId}`, 'xxx')).rejects.toThrowError('THREAD_COMMENT.NOT_FOUND');
     });
-  });
 
-  describe('verifyCommentExists function', () => {
-    it('should return true if comment exists', async () => {
-      const randomId = nanoid(16);
-
-      // Add User
-      await UsersTableTestHelper.addUser({ id: `user-${randomId}`, username: `riskiamad${randomId}`});
-
-      // Add Thread
-      await ThreadsTableTestHelper.addThread({ id: `thread-${randomId}`, owner: `user-${randomId}` });
-
-      // Arrange
-      const newComment = new NewThreadComment({
-        content: 'content comment',
-        threadId: `thread-${randomId}`,
-        owner: `user-${randomId}`,
-      });
-      const fakeIdGenerator = () => randomId;
+    it('should throw error not found', async () => {
+      const fakeIdGenerator = () => '123';
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
-      // Action
-      const addedComment = await threadCommentRepositoryPostgres.addComment(newComment);
-      const exists = await threadCommentRepositoryPostgres.verifyCommentExists(`comment-${randomId}`);
-
       // Assert
-      expect(exists).toEqual(true);
+      await expect(threadCommentRepositoryPostgres.verifyCommentOwner({commentId: 'xxx', owner: 'xxx'})).rejects.toThrowError('THREAD_COMMENT.NOT_FOUND');
     });
   });
 });

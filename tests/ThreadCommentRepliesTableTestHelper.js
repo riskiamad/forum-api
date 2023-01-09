@@ -3,11 +3,11 @@ const pool = require('../src/Infrastructures/database/postgres/pool');
 
 const ThreadCommentRepliesTestHelper = {
   async addReply({
-    id = 'reply-123', content = 'content reply', commentId = 'comment-123', owner = 'user-123'
-                 }) {
+    id = 'reply-123', content = 'content reply', commentId = 'comment-123', owner = 'user-123', date = new Date().toISOString()
+  }) {
     const query = {
-      text: 'INSERT INTO thread_comment_replies VALUES($1, $2, $3, $4)',
-      values: [id, content, commentId, owner],
+      text: 'INSERT INTO thread_comment_replies VALUES($1, $2, $3, $4, $5)',
+      values: [id, content, commentId, owner, date],
     };
 
     await pool.query(query);
@@ -15,7 +15,7 @@ const ThreadCommentRepliesTestHelper = {
 
   async findReplyById(id) {
     const query = {
-      text: 'SELECT * FROM thread_comment_replies WHERE id = $1 AND NOT is_delete',
+      text: 'SELECT id, content, owner, thread_comment_id, is_delete, date FROM thread_comment_replies WHERE id = $1',
       values: [id],
     };
 

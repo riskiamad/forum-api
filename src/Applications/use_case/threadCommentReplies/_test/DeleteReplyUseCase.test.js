@@ -13,15 +13,8 @@ describe('DeleteReplyUseCase', () => {
     const mockThreadCommentReplyRepository = new ThreadCommentReplyRepository();
 
     /** mocking needed function */
-    mockThreadCommentReplyRepository.getReplyById = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        id: 'reply-123',
-        content: 'content reply',
-        commentId: 'comment-123',
-        owner: 'user-123',
-        date: '2022-12-29T20:17:28.526Z',
-        isDelete: false,
-      }));
+    mockThreadCommentReplyRepository.verifyReplyOwner = jest.fn()
+      .mockImplementation(() => Promise.resolve(true));
     mockThreadCommentReplyRepository.deleteReply = jest.fn()
       .mockImplementation(() => Promise.resolve());
 
@@ -34,8 +27,8 @@ describe('DeleteReplyUseCase', () => {
     await deleteReplyUseCase.execute(deletePayload);
 
     // Assert
-    expect(mockThreadCommentReplyRepository.getReplyById(deletePayload.replyId));
+    expect(mockThreadCommentReplyRepository.verifyReplyOwner(deletePayload.owner));
     expect(mockThreadCommentReplyRepository.deleteReply)
       .toHaveBeenCalledWith(deletePayload.replyId);
-  })
-})
+  });
+});

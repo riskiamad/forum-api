@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 exports.up = (pgm) => {
   pgm.createTable('thread_comments', {
     id: {
@@ -28,7 +26,7 @@ exports.up = (pgm) => {
     date: {
       type: 'TIMESTAMP',
       notNull: true,
-      default: pgm.func('CURRENT_TIMESTAMP'),
+      default: pgm.func('current_timestamp')
     },
     is_delete: {
       type: 'BOOLEAN',
