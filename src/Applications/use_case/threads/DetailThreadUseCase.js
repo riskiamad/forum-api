@@ -15,7 +15,7 @@ class DetailThreadUseCase {
     const comments = await this._threadCommentRepository.getCommentsByThreadId(thread.id);
 
     if (comments.length) {
-      thread.comments = comments
+      const commentsMap = new Map();
 
       for (const comment of comments) {
         if (comment.isDelete) {
@@ -23,18 +23,29 @@ class DetailThreadUseCase {
         }
         delete comment.isDelete;
 
-        const replies = await this._threadCommentReplyRepository.getRepliesByCommentId(comment.id);
-        if (replies.length) {
-          comment.replies = replies;
+        commentsMap.set(comment.id, comment);
+      }
 
-          for (const reply of replies) {
-            if (reply.isDelete) {
-              reply.content = '**balasan telah dihapus**';
-            }
-            delete reply.isDelete;
+      const commentIds = Array.from(commentsMap.keys());
+
+      const replies = await this._threadCommentReplyRepository.getRepliesByCommentIds(commentIds);
+
+      if (replies.length) {
+        for (const reply of replies) {
+          if (reply.isDelete) {
+            reply.content = '**balasan telah dihapus**';
           }
+          delete reply.isDelete;
+
+          let commentObject = commentsMap.get(reply.commentId);
+
+          delete reply.commentId;
+
+          commentObject.replies ? commentObject.replies.push(reply) : commentObject.replies = [reply];
         }
       }
+
+      thread.comments = Array.from(commentsMap.values());
     }
 
     return thread;

@@ -8,7 +8,7 @@ class ThreadCommentReplyRepositoryPostgres extends ThreadCommentReplyRepository 
   }
 
   async addReply(newReply) {
-    const { content, commentId, owner } = newReply;
+    const {content, commentId, owner} = newReply;
     const id = `reply-${this._idGenerator()}`;
     const date = new Date().toISOString();
 
@@ -25,21 +25,22 @@ class ThreadCommentReplyRepositoryPostgres extends ThreadCommentReplyRepository 
   async deleteReply(replyId) {
     const query = {
       text: 'UPDATE thread_comment_replies' +
-            ' SET is_delete = true' +
-            ' WHERE id = $1',
+        ' SET is_delete = true' +
+        ' WHERE id = $1',
       values: [replyId],
     };
 
     await this._pool.query(query);
   }
 
-  async getRepliesByCommentId(commentId) {
+  async getRepliesByCommentIds(commentIds) {
     const query = {
-      text: `SELECT tcr.id, tcr.date, tcr.content, tcr.is_delete AS "isDelete", u.username` +
-        ` FROM thread_comment_replies tcr ` +
-        ` LEFT JOIN users u ON u.id = tcr.owner` +
-        ` WHERE tcr.thread_comment_id = $1 ORDER BY date ASC`,
-      values: [commentId],
+      text: `SELECT tcr.id, tcr.date, tcr.content, tcr.is_delete AS "isDelete", tcr.thread_comment_id AS "commentId", u.username
+      FROM thread_comment_replies tcr
+      INNER JOIN users u ON u.id = tcr.owner
+      WHERE tcr.thread_comment_id = ANY($1::text[])
+      ORDER BY tcr.date ASC`,
+      values: [commentIds],
     };
 
     const result = await this._pool.query(query);
