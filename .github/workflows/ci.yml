@@ -1,9 +1,5 @@
 name: Continuous Integration
 
-permissions:
-  id-token: write # required to use OIDC authentication
-  contents: read # required to checkout the code from the repo
-
 on:
   pull_request:
     branches:
@@ -19,12 +15,6 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.ARN_ROLE }}
-          role-duration-seconds: 900 # the ttl of the session, in seconds.
-          aws-region: ap-southeast-1 # use your region here.
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
