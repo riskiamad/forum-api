@@ -53,6 +53,5 @@ describe('AddReplyUseCase', () => {
     expect(addedReply.id).toEqual('reply-123');
     expect(addedReply.content).toEqual(useCasePayload.content);
     expect(addedReply.owner).toEqual(useCasePayload.owner);
-
   });
 });

@@ -23,6 +23,8 @@ DomainErrorTranslator._directories = {
   'NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat thread baru karena tipe data tidak sesuai'),
   'NEW_THREAD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menambahkan comment baru karena properti yang dibutuhkan tidak ada'),
   'NEW_THREAD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan comment baru karena tipe data tidak sesuai'),
+  'LIKE_THREAD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat user comment like baru karena properti yang dibutuhkan tidak ada'),
+  'LIKE_THREAD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat user comment like baru karena tipe data tidak sesuai'),
   'THREAD_COMMENT.UNAUTHORIZED': new AuthorizationError('tidak dapat menghapus comment yang bukan milik anda'),
   'THREAD_COMMENT.NOT_FOUND': new NotFoundError('comment tidak ditemukan'),
   'THREAD.NOT_FOUND': new NotFoundError('thread tidak ditemukan'),
@@ -30,6 +32,7 @@ DomainErrorTranslator._directories = {
   'NEW_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menambahkan balasan baru karena tipe data tidak sesuai'),
   'THREAD_COMMENT_REPLY.UNAUTHORIZED': new AuthorizationError('tidak dapat menghapus balasan yang bukan milik anda'),
   'THREAD_COMMENT_REPLY.NOT_FOUND': new NotFoundError('balasan tidak ditemukan'),
+  'USER_COMMENT_LIKE.NOT_FOUND': new NotFoundError('user comment like tidak ditemukan'),
 };
 
 module.exports = DomainErrorTranslator;
