@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: configure aws credentials
-      - uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.ARN_ROLE }}
           role-duration-seconds: 900 # the ttl of the session, in seconds.
