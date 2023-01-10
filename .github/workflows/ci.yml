@@ -1,15 +1,15 @@
 name: Continuous Integration
 
+permissions:
+  id-token: write # required to use OIDC authentication
+  contents: read # required to checkout the code from the repo
+
 on:
   pull_request:
     branches:
       - master
 
 jobs:
-  permissions:
-    id-token: write # required to use OIDC authentication
-    contents: read # required to checkout the code from the repo
-
   test:
     runs-on: ubuntu-latest
 
