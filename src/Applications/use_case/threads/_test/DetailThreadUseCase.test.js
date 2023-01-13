@@ -96,6 +96,6 @@ describe('DetailThreadUseCase', () => {
     expect(detailThread).toStrictEqual(expectedDetailThread);
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
     expect(mockThreadCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
-    expect(mockThreadCommentReplyRepository.getRepliesByCommentIds).toBeCalledWith(['xxx']);
+    expect(mockThreadCommentReplyRepository.getRepliesByCommentIds).toBeCalledWith(['comment-123']);
   });
 });
